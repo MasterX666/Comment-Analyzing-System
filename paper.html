@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Comment Analyzing System</title>
+    <link rel="stylesheet"  href="css/paperstyle.css">
+    <script type="text/javascript" src="js/echarts.js"></script>
+</head>
+<script>
+  
+    var pdata={
+      "ptitle":"城市建设不应该遵从民意",//标题
+      "platform":"微博",//平台
+      "hotday":31,//持续热度天数
+       "date":"10-08",//报告日期
+       "total":1000,//总人数
+       "water":335,//水军（无效评论）
+       "lowrate":1,//可信比
+       "hotid":"user",//最受欢迎ID
+       "hotreview":"我随便一打就是标准的一个十五字",//最受欢迎评论
+       "hday":"10-02",//最受欢迎日
+       "lday":"10-05",//最不受欢迎日
+       "trend":0,//人数趋势
+       "feel":0,//情感倾向
+       "topfeel":0,//情感结论
+       "picm_data1":['无效评论','邮件营销','联盟广告','视频广告','有意义的评论'],
+       "picm_data2":[
+             {value:335, name:'无效评论'},
+             {value:310, name:'邮件营销'},
+             {value:234, name:'联盟广告'},
+             {value:135, name:'视频广告'},
+             {value:1548, name:'有意义的评论'},
+         ],
+       "pict_data1":['10-01', '10-02', '10-03', '10-04', '10-05', '10-06', '10-07'],  
+       "pict_data2":[120, 200, 150, 80, 70, 110, 130],
+       "picf_data":[
+             {value:335, name:'反对'},
+             {value:310, name:'态度不明'},
+             {value:400, name:'支持'},
+         ],
+     }
+    
+     function GetPercent(num, total) {
+                       num = parseFloat(num);
+                       total = parseFloat(total);
+                       return Number((num/total)*100).toFixed(2);
+                } 
+     var waterrate=GetPercent(pdata.water,pdata.total)+"%";//无效评论占比
+     
+     function MakeCom(t){
+        
+         if(t>0) return "我们建议：该话题所属评论可以作为参考";
+         else  return "我们建议：该话题所属评论参考价值不高，请谨慎甄别！";
+     }
+
+     function MakeTre(t){
+         if(t>0) return "保持上升";
+         else if(t==0) return "维持稳定";
+         else return "逐步下降";
+     }
+     
+     function MakeFel(t){
+         if(t>0) return "普遍支持";
+         else if(t==0) return "没有明显倾向";
+         else return "普遍反对";
+     }
+     
+     function MaketFel(t){
+         if(t>0) return "可以得出结论";
+         else return "仍需观望";
+     }
+
+     //图表1
+     var OptionPicm={
+     title : {
+     text: '某话题用户评论质量分析',
+     subtext: '仅供参考',
+     x:'center'
+ },
+ tooltip : {
+     trigger: 'item',
+     formatter: "{a} <br/>{b} : {c} ({d}%)"
+ },
+ legend: {
+     orient: 'vertical',
+     left: 'left',
+     data: pdata.picm_data1,
+ },
+ series : [
+     {
+         name: '评论类型',
+         type: 'pie',
+         radius : '55%',
+         center: ['50%', '60%'],
+         data:pdata.picm_data2,
+         itemStyle: {
+             emphasis: {
+                 shadowBlur: 10,
+                 shadowOffsetX: 0,
+                 shadowColor: 'rgba(0, 0, 0, 0.5)'
+             }
+         }
+     }
+ ]
+                 }
+     //图表2
+     var OptionPict={                  
+     xAxis: {
+         type: 'category',
+         data: pdata.pict_data1
+     },
+     yAxis: {
+         type: 'value'
+     },
+     series: [{
+         data: pdata.pict_data2 ,
+         type: 'line',
+         symbol: 'circle',
+         symbolSize: 20,
+         lineStyle: {
+             normal: {
+                 color: 'green',
+                 width: 4,
+                 type: 'dashed'
+             }
+         },
+         itemStyle: {
+             normal: {
+                 borderWidth: 3,
+                 borderColor: 'grey',
+                 color: 'blue'
+             }
+         }
+     }]
+      }
+     //图表3
+     var OptionPicf={
+ backgroundColor: '#2c343c',
+
+ title: {
+     text: '情感分类图',
+     left: 'center',
+     top: 20,
+     textStyle: {
+         color: '#ccc'
+     }
+ },
+
+ tooltip : {
+     trigger: 'item',
+     formatter: "{a} <br/>{b} : {c} ({d}%)"
+ },
+
+ visualMap: {
+     show: false,
+     min: 80,
+     max: 600,
+     inRange: {
+         colorLightness: [0, 1]
+     }
+ },
+ series : [
+     {
+         name:'情感分类',
+         type:'pie',
+         radius : '55%',
+         center: ['50%', '50%'],
+         data:pdata.picf_data.sort(function (a, b) { return a.value - b.value; }),
+         roseType: 'radius',
+         label: {
+             normal: {
+                 textStyle: {
+                     color: 'rgba(255, 255, 255, 0.3)'
+                 }
+             }
+         },
+         labelLine: {
+             normal: {
+                 lineStyle: {
+                     color: 'rgba(255, 255, 255, 0.3)'
+                 },
+                 smooth: 0.2,
+                 length: 10,
+                 length2: 20
+             }
+         },
+         itemStyle: {
+             normal: {
+                 color: '#c23531',
+                 shadowBlur: 200,
+                 shadowColor: 'rgba(0, 0, 0, 0.5)'
+             }
+         },
+
+         animationType: 'scale',
+         animationEasing: 'elasticOut',
+         animationDelay: function (idx) {
+             return Math.random() * 200;
+         }
+     }
+ ]
+                     }
+
+     var cl=pdata.picf_data.length;//情感数据数组大小
+     
+     function conclu(cl)
+     {
+         var x="";
+         for(var i=0;i<cl;i++)
+         {
+            x=x+"目前有"+pdata.picf_data[i].value+"人表示"+pdata.picf_data[i].name
+            if(i!=cl-1) x+=","
+            else x+="。"
+         }
+         document.getElementById("conc").innerHTML=x;
+     }
+
+     function renew(){
+        document.getElementById("ptitle").innerHTML=pdata.ptitle;
+        document.getElementById("platform").innerHTML=pdata.platform;
+        document.getElementById("hotday").innerHTML=pdata.hotday;
+        document.getElementById("date").innerHTML=pdata.date;
+        document.getElementById("total").innerHTML=pdata.total;
+        document.getElementById("water").innerHTML=pdata.water;
+        document.getElementById("waterrate").innerHTML=waterrate;
+        document.getElementById("lowrate").innerHTML=MakeCom(pdata.lowrate);
+        document.getElementById("hotid").innerHTML=pdata.hotid;
+        document.getElementById("hotreview").innerHTML=pdata.hotreview;
+        document.getElementById("hday").innerHTML=pdata.hday;
+        document.getElementById("lday").innerHTML=pdata.lday;
+        document.getElementById("trend").innerHTML=MakeTre(pdata.trend);
+        document.getElementById("feel").innerHTML=MakeFel(pdata.feel);
+        document.getElementById("topfeel").innerHTML=MaketFel(pdata.topfeel);
+        conclu(cl);
+     }
+     window.onload=renew;
+</script>
+
+<body onload="renew()">
+    <div class="container">
+         <div class="title">
+             <p>您好！这是关于“
+                <span id="ptitle">  </span>
+                ”的报告
+             </p>
+         </div>
+
+         <div id="member">
+              <p>评论相关平台：<span id="platform">     </span></p>
+              <p>持续热度：<span id="hotday">  </span>天</p>
+              <p>报告日期：<span id="date">    </span></p>
+         </div>
+         <div id="picm">
+                <script>
+                        // 绘制图表。
+                echarts.init(document.getElementById('picm')).setOption(OptionPicm);
+                    </script>
+         </div>
+         
+         <div id="picm-tip">
+                <p>本话题一共<span id="total">0</span>人参与<br /><br />
+                    其中有
+                    <span id="water">0</span>人的评论不具参考价值（无意义评论、
+                    水军、涉黄等）,占总数的<span id="waterrate">0%</span>。<br /><br />
+                    <p id="lowrate"></p><br/><br/>
+                    <p>其中最受关注的评论为用户：<span id="hotid"></span> 的评论："
+                        <span id="hotreview" ></span> "</p>             
+                 </p>
+         </div>
+         
+         <div id="pict">
+            <script>
+                // 绘制图表。
+                echarts.init(document.getElementById('pict')).setOption(OptionPict);
+            </script>
+         </div>
+
+         <div id="pict-tip">
+               <P>由左图人数参与分布图可以看出，该话题参与人数在
+                 <span id="hday"></span> 达到最多，而在
+                 <span id="lday"></span> 热度最低。由走势分析该话题参与度
+                 <span id="trend"></span>。<br>
+                 <br>本报告所著结论仅代表当前该话题评论分析结论。</P>
+         </div>
+
+         <div id="picf">
+             <script>
+               // 绘制图表。
+               echarts.init(document.getElementById('picf')).setOption(OptionPicf);
+             </script>
+         </div>
+
+
+         <div id="picf-tip">
+             <p>而在有效评论中进行情感分类，统计发现<p id="conc"></p>
+                <br>
+                将统计人数作为参考，我们可以认为目前关于该话题人们的态度：
+                <span id="feel">普遍支持</span>。
+                <br/> <br/>而结合走势图分析，我们认为关于群众的情感倾向
+                <span id="topfeel">支持</span></p>
+         </div>
+
+         <div id="result">
+             <p>
+
+             </p>
+         </div>
+    </div>
+</body>
+</html>
