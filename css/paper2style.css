@@ -1,6 +1,7 @@
 * {
     margin: 0px;
     padding: 0px;
+    scroll-behavior:smooth;
   }
 
   
@@ -8,6 +9,7 @@ body{
     font-family: arial;
     font-size: 20px;
     background-color: rgb(245, 245, 245);
+    scroll-behavior:smooth;
 }
 
 .container{
@@ -16,6 +18,7 @@ body{
     
     /*display: inline-block;*/
     position: absolute;
+    scroll-behavior:smooth;
 }
 
 .nav{
@@ -37,7 +40,8 @@ body{
     box-shadow: 0px -1px 8px rgb(160, 160, 160);
     height:3700px;
     float: right;
-    
+    scroll-behavior: smooth; 
+    overflow: hidden; 
 }
 
 .title{
@@ -97,7 +101,7 @@ body{
 #bground{
     width:1100px;
     height: 280px;
-   
+    position: relative; 
 
 }
 
@@ -132,7 +136,7 @@ body{
 #btrend{
     width:1100px;
     height:600px;
-   
+    position: relative;
 }
 
 #btrtitles{
@@ -172,7 +176,7 @@ body{
 #bhreview{
     width:1100px;
     height:700px;
-    
+    position: relative;
 }
 
 #bhrtitles{
@@ -244,7 +248,7 @@ body{
 #bfeel{
     width:1100px;
     height:600px;
-   
+    position: relative;
 }
 
 #bftitles{
@@ -289,7 +293,7 @@ body{
 #buser{
     width:1100px;
     height:600px;
-   
+    position: relative;
 }
 
 #butitles{
@@ -332,7 +336,7 @@ body{
 #bdata{
     width:1100px;
     height:800px;
-    
+    position: relative;
 }
 
 #bdtitles{
