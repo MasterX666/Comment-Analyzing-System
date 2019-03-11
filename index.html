@@ -18,7 +18,8 @@
                 else if(t>11&&t<=13) document.write("中午好，现在是当地时间")
                 else if(t>13&&t<=18) document.write("下午好，现在是当地时间")
                 else if(t>18) document.write("晚上好，现在是当地时间") 
-                 document.write (d.getFullYear()+"年"+d.getMonth()+1+"月"+d.getDate()+"日，"+t+"点"+d.getMinutes()+"分，星期")
+                var m=d.getMonth()+1
+                 document.write (d.getFullYear()+"年"+m+"月"+d.getDate()+"日，"+t+"点"+d.getMinutes()+"分，星期")
                 var da=d.getDay()
                 switch(da)
                 {
@@ -106,10 +107,10 @@
                 <div id="commend">
                 <div id="nav1">
                     <div class="hot">近期热点</div>
-                    <a class="hot-page 1" href="paper.html">热点1</a>
-                    <a class="hot-page 2" href="paper.html">热点2</a>
-                    <a class="hot-page 3" href="paper.html">热点3</a>
-                    <a class="hot-page 4" href="paper.html">热点4</a>
+                    <a class="hot-page 1" href="paper2.html">城市建设不应该遵从民意</a>
+                    <a class="hot-page 2" href="paper2.html">全球变暖问题持续关注</a>
+                    <a class="hot-page 3" href="paper2.html">美中“贸易战”持续升温</a>
+                    <a class="hot-page 4" href="paper2.html">青少年学业压力大引起关注</a>
                 </div>
                 <div id="nav2">
                     <div class="nav-sina">
