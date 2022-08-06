@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Comment Analyzing System</title>
+    <link rel="stylesheet"  href="css/paper2style.css">
+    <script type="text/javascript" src="js/echarts.js"></script>
+    <script type="text/javascript" src="js/jquery.js"></script>
+</head>
+<script>
+     
+     var pdata={
+       "ptitle":"城市设不应该遵从民意",//标题
+       "platform":"微博",//平台     
+       "total":1000,//总人数
+       "water":335,//水军（无效评论）
+       "lowrate":1,//可信比      
+       "trend":0,//人数趋势
+       "feel":"难过",//情感倾向
+       "topfeel":"高兴",//情感结论
+       "hreview":[
+           {"name":"Joy张喵喵","review":"//@阳泉中级法院:转发微博"},
+           {"name":"央视新闻","review":"【成都交警：车顶放玩偶属交通违法 罚款扣分！】四川成都，3月26日起，对在车身外放置玩偶等物体的违法行为，交警将一律以“驾车时有其它妨碍安全..."},
+           {"name":"头条新闻","review":"【成都交警：#车顶放玩偶违法# 下周起一律罚款扣分】22日，成都交警在二环路万年场路口，对车顶上安装了以蜘蛛侠、蝙蝠侠、超人、僵尸等造型为主..."},
+           {"name":"环球资讯广播","review":"#焦点直击#【“蜘蛛侠”趴车顶很拉风？成都交警半小时逮了4个】22日，成都万年场路口，交警半小时就逮到4辆车顶放有蜘蛛侠、植物僵尸等玩偶的车..."},
+           {"name":"我爱井冈映山红","review":"【车顶站7个葫芦娃很酷？成都交警:罚款200元】最近，车顶上立着玩偶的照片引发热议。这些安装在车上的玩偶，看似好看，但对交通安全带来很大的隐..."},
+           {"name":"人民网","review":"【车顶站7个葫芦娃很酷？成都交警:罚款200元】最近，车顶上立着玩偶的照片引发热议。这些安装在车上的玩偶，看似好看，但对交通安全带来很大的隐..."},
+           {"name":"中国新闻周刊","review":"【保时捷车顶坐了7只葫芦娃, 警察发微博问: 这样安全吗? 网友评论歪了…】日前，苏州公安微博发出一张图片，图中保时捷车顶上坐了7只葫芦娃玩..."},
+           {"name":"新华网","review":"大数据不仅“懂”你，还懂如何“宰”你"},
+           {"name":"坝坝6290525941","review":"啊啊啊啊啊"}
+       ],
+       "picm_data1":["无效评论","邮件营销","联盟广告","视频广告","有意义的评论"],
+       "picm_data2":[
+             {"value":335, "name":"无效评论"},
+             {"value":310, "name":"邮件营销"},
+             {"value":234, "name":"联盟广告"},
+             {"value":135, "name":"视频广告"},
+             {"value":1548,"name":"有意义的评论"}
+         ],
+       "pict_data1":["2018-10-01", "2018-10-02", "2018-10-03", "2018-10-04", "2018-10-05", "2018-10-06", "2018-10-07"],  
+       "pict_data2":[120, 200, 150, 80, 70, 110, 130],
+       "picf_data":[
+             {"value":335, "name":"反对"},
+             {"value":310, "name":"态度不明"},
+             {"value":400, "name":"支持"}
+         ],
+       "picsex_data1":["男性","女性","其它"],
+       "picsex_data2":[
+                {"value":600, "name":"男性"},
+                {"value":300, "name":"女性"},
+                {"value":100, "name":"其它"}
+            ],
+        "picu_data1":["真实用户","疑似水军"],
+        "picu_data2":[
+                {"value":931, "name":"真实用户"},
+                {"value":69, "name":"疑似水军"}
+            ]
+     }
+     
+
+     var hotday=pdata.pict_data1.length;
+     var startdate=pdata.pict_data1[0];
+     var enddate=pdata.pict_data1[pdata.pict_data1.length-1];
+     var hcomment=pdata.pict_data2[0];
+     var lcomment=pdata.pict_data2[0];
+     var hday=pdata.pict_data1[0];
+     var lday=pdata.pict_data1[0];
+    for(var i=1;i<pdata.pict_data2.length;i++)
+    {
+        var cur=pdata.pict_data2[i];
+        if(cur>hcomment){
+            hcomment=cur;
+            hday=pdata.pict_data1[i];
+        }
+        if(cur<lcomment){
+            lcomment=cur;
+            lday=pdata.pict_data1[i];
+        }
+    }
+
+     function GetPercent(num, total) {
+                       num = parseFloat(num);
+                       total = parseFloat(total);
+                       return Number((num/total)*100).toFixed(2);
+                } 
+     var waterrate=GetPercent(pdata.water,pdata.total)+"%";//无效评论占比
+     
+     function MakeCom(t){
+        
+         if(t>0) return "我们建议：该话题所属评论可以作为参考";
+         else  return "我们建议：该话题所属评论参考价值不高，请谨慎甄别！";
+     }
+
+     function MakeTre(t){
+         if(t>0) return "保持上升";
+         else if(t==0) return "维持稳定";
+         else return "逐步下降";
+     }
+     
+     function MakeFel(t){
+         if(t>0) return "普遍支持";
+         else if(t==0) return "没有明显倾向";
+         else return "普遍反对";
+     }
+     
+     function MaketFel(t){
+         if(t>0) return "可以得出结论";
+         else return "仍需观望";
+     }
+
+     //图表1
+     var OptionPicm={
+     title : {
+     text: '该话题用户评论质量分析',
+     subtext: '微博',
+     x:'center'
+     },
+     tooltip : {
+     trigger: 'item',
+     formatter: "{a} <br/>{b} : {c} ({d}%)"
+     },
+    legend: {
+     orient: 'vertical',
+     left: 'left',
+     data: pdata.picm_data1,
+    },
+ series : [
+     {
+         name: '评论类型',
+         type: 'pie',
+         radius : '55%',
+         center: ['50%', '60%'],
+         data:pdata.picm_data2,
+         itemStyle: {
+             emphasis: {
+                 shadowBlur: 10,
+                 shadowOffsetX: 0,
+                 shadowColor: 'rgba(0, 0, 0, 0.5)'
+             }
+         }
+     }
+ ]
+                 }
+     //图表2
+     var OptionPict={                  
+     xAxis: {
+         type: 'category',
+         data: pdata.pict_data1
+     },
+     yAxis: {
+         type: 'value'
+     },
+     series: [{
+         data: pdata.pict_data2 ,
+         type: 'line',
+         symbol: 'circle',
+         symbolSize: 15,
+         lineStyle: {
+             normal: {
+                 color: 'red',
+                 width: 4,
+                 type: 'solid'
+             }
+         },
+         itemStyle: {
+             normal: {
+                 borderWidth: 2,
+                 borderColor: 'grey',
+                 color: 'blue'
+             }
+         }
+     }]
+      }
+     //图表3
+     var OptionPicf={
+ backgroundColor: '#2c343c',
+
+ title: {
+     text: '情感分类图',
+     left: 'center',
+     top: 20,
+     textStyle: {
+         color: '#ccc'
+     }
+ },
+
+ tooltip : {
+     trigger: 'item',
+     formatter: "{a} <br/>{b} : {c} ({d}%)"
+ },
+
+ visualMap: {
+     show: false,
+     min: 80,
+     max: 600,
+     inRange: {
+         colorLightness: [0, 1]
+     }
+ },
+ series : [
+     {
+         name:'情感分类',
+         type:'pie',
+         radius : '55%',
+         center: ['50%', '50%'],
+         data:pdata.picf_data.sort(function (a, b) { return a.value - b.value; }),
+         roseType: 'radius',
+         label: {
+             normal: {
+                 textStyle: {
+                     color: 'rgba(255, 255, 255, 0.3)'
+                 }
+             }
+         },
+         labelLine: {
+             normal: {
+                 lineStyle: {
+                     color: 'rgba(255, 255, 255, 0.3)'
+                 },
+                 smooth: 0.2,
+                 length: 10,
+                 length2: 20
+             }
+         },
+         itemStyle: {
+             normal: {
+                 color: '#c23531',
+                 shadowBlur: 200,
+                 shadowColor: 'rgba(0, 0, 0, 0.5)'
+             }
+         },
+
+         animationType: 'scale',
+         animationEasing: 'elasticOut',
+         animationDelay: function (idx) {
+             return Math.random() * 200;
+         }
+     }
+ ]
+                     }
+     
+     var OptionPicsex={
+        tooltip: {
+        trigger: 'item',
+        formatter: "{a} <br/>{b}: {c} ({d}%)"
+    },
+    legend: {
+        orient: 'vertical',
+        x: 'left',
+        data:pdata.picsex_data1,
+    },
+    series: [
+        {
+            name:'用户性别',
+            type:'pie',
+            radius: ['50%', '70%'],
+            avoidLabelOverlap: false,
+            label: {
+                normal: {
+                    show: false,
+                    position: 'center'
+                },
+                emphasis: {
+                    show: true,
+                    textStyle: {
+                        fontSize: '30',
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            labelLine: {
+                normal: {
+                    show: false
+                }
+            },
+            data:pdata.picsex_data2,
+        }
+    ]
+     }
+     
+     var OptionPicu={
+        tooltip: {
+        trigger: 'item',
+        formatter: "{a} <br/>{b}: {c} ({d}%)"
+    },
+    legend: {
+        orient: 'vertical',
+        x: 'left',
+        data:pdata.picu_data1,
+    },
+    series: [
+        {
+            name:'访问来源',
+            type:'pie',
+            radius: ['50%', '70%'],
+            avoidLabelOverlap: false,
+            label: {
+                normal: {
+                    show: false,
+                    position: 'center'
+                },
+                emphasis: {
+                    show: true,
+                    textStyle: {
+                        fontSize: '30',
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            labelLine: {
+                normal: {
+                    show: false
+                }
+            },
+            data:pdata.picu_data2
+        }
+    ]
+     }
+     
+     var cl=pdata.picf_data.length;//情感数据数组大小
+     
+
+     function MPicu(p)
+     {
+         OptionPicu.legend.data=p.picu_data1;
+         
+     }
+     function conclu(cl)
+     {
+         var x="";
+         for(var i=0;i<cl;i++)
+         {
+            x=x+"目前有"+pdata.picf_data[i].value+"人表示"+pdata.picf_data[i].name
+            if(i!=cl-1) x+=","
+            else x+="。"
+         }
+         document.getElementById("conc").innerHTML=x;
+     }
+
+     function renew(p){
+        var hotday=p.pict_data1.length;
+        var startdate=p.pict_data1[0];
+        var enddate=p.pict_data1[p.pict_data1.length-1];
+        var hcomment=p.pict_data2[0];
+        var lcomment=p.pict_data2[0];
+        var hday=p.pict_data1[0];
+        var lday=p.pict_data1[0];
+        var waterrate=GetPercent(p.water,p.total)+"%";
+
+        for(var i=1;i<p.pict_data2.length;i++)
+        {
+        var cur=p.pict_data2[i];
+        if(cur>hcomment){
+            hcomment=cur;
+            hday=p.pict_data1[i];
+        }
+        if(cur<lcomment){
+            lcomment=cur;
+            lday=p.pict_data1[i];
+        }
+        }
+
+        var x=document.getElementsByClassName("ptitle");
+            for(let i in x){
+            x[i].innerHTML=p.ptitle;
+           }
+        document.getElementById("startdate").innerHTML=startdate.replace(/-/g,"/");
+        document.getElementById("enddate").innerHTML=enddate.replace(/-/g,"/");
+        document.getElementById("platform").innerHTML=p.platform;
+        var x=document.getElementsByClassName("total");
+            for(let i in x){
+            x[i].innerHTML=p.total;
+           }
+        var x=document.getElementsByClassName("hday");
+            for(let i in x){
+            x[i].innerHTML=hday.replace(/-/g,"/");
+           }
+        document.getElementById("hcomment").innerHTML=hcomment; 
+        document.getElementById("lcomment").innerHTML=lcomment;   
+        document.getElementById("lday").innerHTML=lday.replace(/-/g,"/");
+        var x=document.getElementsByClassName("trend");
+            for(let i in x){
+            x[i].innerHTML=MakeTre(p.trend);
+           }
+           conclu(cl);
+        //document.getElementById("feel").innerHTML=p.feel;
+        document.getElementById("feel").innerHTML=MakeFel(p.feel);
+        document.getElementById("topfeel").innerHTML=p.topfeel;
+        document.getElementById("water").innerHTML=p.water;
+        document.getElementById("waterrate").innerHTML=waterrate;
+        document.getElementById("lowrate").innerHTML=MakeCom(p.lowrate);
+        document.getElementById("lowrate1").innerHTML=MakeCom(p.lowrate);
+        document.getElementById("hotday").innerHTML=hotday;
+        var x=document.getElementsByClassName("yhname");
+            for(var i=0;i<9;i++){
+                x[i].innerHTML=p.hreview[i].name;
+            }
+        var x=document.getElementsByClassName("yhreview");
+            for(var i=0;i<9;i++){
+                x[i].innerHTML=p.hreview[i].review;
+            } 
+            
+            var cl=p.picf_data.length;//情感数据数组大小
+            { var x="";
+          for(var i=0;i<cl;i++)
+          {
+            x=x+"目前有"+p.picf_data[i].value+"人表示"+p.picf_data[i].name
+            if(i!=cl-1) x+=","
+            else x+="。"
+          }
+          document.getElementById("conc").innerHTML=x;
+            }
+            
+            var OptionPict={                  
+     xAxis: {
+         type: 'category',
+         data: p.pict_data1
+     },
+     yAxis: {
+         type: 'value'
+     },
+     series: [{
+         data: p.pict_data2 ,
+         type: 'line',
+         symbol: 'circle',
+         symbolSize: 15,
+         lineStyle: {
+             normal: {
+                 color: 'red',
+                 width: 4,
+                 type: 'solid'
+             }
+         },
+         itemStyle: {
+             normal: {
+                 borderWidth: 2,
+                 borderColor: 'grey',
+                 color: 'blue'
+             }
+         }
+     }]
+      }
+            var OptionPicm={
+     title : {
+     text: '该话题用户评论质量分析',
+     subtext: '微博',
+     x:'center'
+     },
+     tooltip : {
+     trigger: 'item',
+     formatter: "{a} <br/>{b} : {c} ({d}%)"
+     },
+    legend: {
+     orient: 'vertical',
+     left: 'left',
+     data: p.picm_data1,
+    },
+ series : [
+     {
+         name: '评论类型',
+         type: 'pie',
+         radius : '55%',
+         center: ['50%', '60%'],
+         data:p.picm_data2,
+         itemStyle: {
+             emphasis: {
+                 shadowBlur: 10,
+                 shadowOffsetX: 0,
+                 shadowColor: 'rgba(0, 0, 0, 0.5)'
+             }
+         }
+     }
+ ]
+                 }
+            var OptionPicf={
+ backgroundColor: '#2c343c',
+
+ title: {
+     text: '情感分类图',
+     left: 'center',
+     top: 20,
+     textStyle: {
+         color: '#ccc'
+     }
+ },
+
+ tooltip : {
+     trigger: 'item',
+     formatter: "{a} <br/>{b} : {c} ({d}%)"
+ },
+
+ visualMap: {
+     show: false,
+     min: 80,
+     max: 600,
+     inRange: {
+         colorLightness: [0, 1]
+     }
+ },
+ series : [
+     {
+         name:'情感分类',
+         type:'pie',
+         radius : '55%',
+         center: ['50%', '50%'],
+         data:p.picf_data.sort(function (a, b) { return a.value - b.value; }),
+         roseType: 'radius',
+         label: {
+             normal: {
+                 textStyle: {
+                     color: 'rgba(255, 255, 255, 0.3)'
+                 }
+             }
+         },
+         labelLine: {
+             normal: {
+                 lineStyle: {
+                     color: 'rgba(255, 255, 255, 0.3)'
+                 },
+                 smooth: 0.2,
+                 length: 10,
+                 length2: 20
+             }
+         },
+         itemStyle: {
+             normal: {
+                 color: '#c23531',
+                 shadowBlur: 200,
+                 shadowColor: 'rgba(0, 0, 0, 0.5)'
+             }
+         },
+
+         animationType: 'scale',
+         animationEasing: 'elasticOut',
+         animationDelay: function (idx) {
+             return Math.random() * 200;
+         }
+     }
+ ]
+                     }
+            var OptionPicsex={
+        tooltip: {
+        trigger: 'item',
+        formatter: "{a} <br/>{b}: {c} ({d}%)"
+    },
+    legend: {
+        orient: 'vertical',
+        x: 'left',
+        data:p.picsex_data1,
+    },
+    series: [
+        {
+            name:'用户性别',
+            type:'pie',
+            radius: ['50%', '70%'],
+            avoidLabelOverlap: false,
+            label: {
+                normal: {
+                    show: false,
+                    position: 'center'
+                },
+                emphasis: {
+                    show: true,
+                    textStyle: {
+                        fontSize: '30',
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            labelLine: {
+                normal: {
+                    show: false
+                }
+            },
+            data:p.picsex_data2,
+        }
+    ]
+     }
+            var OptionPicu={
+        tooltip: {
+        trigger: 'item',
+        formatter: "{a} <br/>{b}: {c} ({d}%)"
+    },
+    legend: {
+        orient: 'vertical',
+        x: 'left',
+        data:p.picu_data1,
+    },
+    series: [
+        {
+            name:'访问来源',
+            type:'pie',
+            radius: ['50%', '70%'],
+            avoidLabelOverlap: false,
+            label: {
+                normal: {
+                    show: false,
+                    position: 'center'
+                },
+                emphasis: {
+                    show: true,
+                    textStyle: {
+                        fontSize: '30',
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            labelLine: {
+                normal: {
+                    show: false
+                }
+            },
+            data:p.picu_data2
+        }
+    ]
+     }
+            echarts.init(document.getElementById('pict')).setOption(OptionPict);
+            echarts.init(document.getElementById('picf')).setOption(OptionPicf);
+            echarts.init(document.getElementById('picsex')).setOption(OptionPicsex);
+            echarts.init(document.getElementById('picu')).setOption(OptionPicu);
+            echarts.init(document.getElementById('picm')).setOption(OptionPicm);
+     }
+    
+     $(function(){
+         $.ajax({
+            type: "post",
+			url: "http://mxlxpsylab.cn:8099/getPdata",
+			dataType: "json",
+			data:{id:1},
+            success: function(res){
+                
+                var s=$.parseJSON(res[1].pdatajson)
+                //alert(typeof(s));
+                //console.log(s.water)
+
+                renew(s);
+            }
+            
+         })
+     })
+</script>
+<body >
+    <div class="container">
+        <div class="nav">
+            <a id="nav1" href="#bground" onclick="changecss(this)">
+                事件简介
+            </a>
+            <a id="nav2" href="#btrend" onclick="changecss(this)">
+                事件趋势
+            </a>
+            <a id="nav3" href="#bhreview" onclick="changecss(this)">
+                热点评论
+            </a>
+            <a id="nav4" href="#bfeel" onclick="changecss(this)">
+                情绪分析
+            </a>
+            <a id="nav5" href="#buser" onclick="changecss(this)">
+                用户分析
+            </a>
+            <a id="nav6" href="#bdata" onclick="changecss(this)">
+                评论分析
+            </a>
+            <a id="nav7" href="index.php" onclick="changecss(this)">
+                返回首页
+            </a>
+            <script>
+                var t="nav"+i
+               function changecss(s){
+                   for(var i=1;i<=6;i++)
+                   {  
+                       t=document.getElementById("nav"+i);
+                       var k=s.style;
+                       s.style.backgroundColor="orangered";
+                       s.style.width="110px";
+                       s.style.height="35px";
+                       s.style.fontSize="19px";
+                       s.style.fontweight="550";
+                       s.style.textAlign="center";
+                       s.style.lineHeight="37px";
+                       s.style.color="white"; 
+                       if(t!=s)
+                       {
+                          t.style=k;
+                       }    
+                   }    
+               }
+            </script>
+        </div>
+       <div class="report">
+            <div class="title">
+                <p>
+                    <span class="ptitle"></span>分析报告
+                 </p>
+            </div>
+            <div id="bground">
+               <div id="btitles">事件简介</div>
+               <div class="bgline"></div>
+               <div id="preconclude">
+                   <p>
+                   本报告围绕关键词“<span class="ptitle"></span>”，对<span id="startdate">
+                   </span>~<span id="enddate"></span>日期间，从<span id="platform"></span>采集到的
+                   <span class="total"></span>条信息进行了深入的分析。<span name="platform"></span>
+                   声量最高峰出现在<span class="hday"></span>,当天共有<span id="hcomment"></span>篇相关评论；
+                   最低峰出现在<span id="lday"></span>,当天共有<span id="lcomment"></span>篇相关评论。
+                   总的来说，整个事件的发展趋势<span class="trend"></span><br>
+                   <p id="lowrate"></p>以下是具体参考数据，可以有针对性的查看
+                   </p>
+                </div>
+            </div>
+            <div id="btrend">
+               <div id="btrtitles">事件趋势</div>
+               <div class="btline"></div>
+               <div id="pict">
+                <script>
+                    // 绘制图表。
+                    
+                </script>
+               </div>
+               <div id="pict-tip">
+                <p>从上图可以看出，整个事件评论共持续<span id="hotday"></span>天，话题最高峰出现在<span class="hday"></span>,
+                    而目前从趋势图分析该话题参与度<span class="trend"></span><br>
+                   本报告所著结论仅代表当前该话题评论分析结论。 
+                </p>
+            </div>
+            </div>
+            <div id="bhreview">
+                <div id="bhrtitles">热点评论</div>
+                <div class="bhline"></div>
+                <div class="bhbground">
+                    <ul>
+                        <li>
+                            <div class="tx">
+                                <img src="images/用户头像.gif">                            
+                            </div>
+                            <p class="yhname">
+                                Joy张喵喵
+                            </p>
+                            <p class="yhreview">
+                                    //@阳泉中级法院:转发微博
+                            </p>
+                        </li>
+                        <li>
+                            <div class="tx">
+                                <img src="images/用户头像.gif">                            
+                            </div>
+                            <p class="yhname">
+                               央视新闻
+                            </p>
+                            <p class="yhreview">
+                                    【成都交警：车顶放玩偶属交通违法 罚款扣分！】四川成都，3月26日起，对在车身外放置玩偶等物体的违法行为，交警将一律以“驾车时有其它妨碍安全...
+                            </p>
+                        </li>
+                        <li>
+                                <div class="tx">
+                                        <img src="images/用户头像.gif">                            
+                                    </div>
+                                    <p class="yhname">
+                                        头条新闻
+                                    </p>
+                                    <p class="yhreview">
+                                            【成都交警：#车顶放玩偶违法# 下周起一律罚款扣分】22日，成都交警在二环路万年场路口，对车顶上安装了以蜘蛛侠、蝙蝠侠、超人、僵尸等造型为主... 
+                                    </p>
+                        </li>
+                        <li>
+                            <div class="tx">
+                                <img src="images/用户头像.gif">                            
+                            </div>
+                            <p class="yhname">
+                                环球资讯
+                            </p>
+                            <p class="yhreview">
+                                    #焦点直击#【“蜘蛛侠”趴车顶很拉风？成都交警半小时逮了4个】22日，成都万年场路口，交警半小时就逮到4辆车顶放有蜘蛛侠、植物僵尸等玩偶的车...
+                            </p>
+                        </li>
+                        <li>
+                                <div class="tx">
+                                        <img src="images/用户头像.gif">                            
+                                    </div>
+                                    <p class="yhname">
+                                        我爱井岗
+                                    </p>
+                                    <p class="yhreview">
+                                        转发微博 
+                                    </p>
+                        </li>
+                        <li>
+                                <div class="tx">
+                                        <img src="images/用户头像.gif">                            
+                                    </div>
+                                    <p class="yhname">
+                                        人民网
+                                    </p>
+                                    <p class="yhreview">
+                                            【车顶站7个葫芦娃很酷？成都交警:罚款200元】最近，车顶上立着玩偶的照片引发热议。这些安装在车上的玩偶，看似好看，但对交通安全带来很大的隐... 
+                                    </p>
+                        </li>
+                        <li>
+                                <div class="tx">
+                                        <img src="images/用户头像.gif">                            
+                                    </div>
+                                    <p class="yhname">
+                                       中国新闻
+                                    </p>
+                                    <p class="yhreview">
+                                    【保时捷车顶坐了7只葫芦娃, 警察发微博问: 这样安全吗? 网友评论歪了…】日前，苏州公安微博发出一张图片，图中保时捷车顶上坐了7只葫芦娃玩.
+                                    </p>
+                        </li>
+                        <li>
+                                <div class="tx">
+                                        <img src="images/用户头像.gif">                            
+                                    </div>
+                                    <p class="yhname">
+                                        新华网
+                                    </p>
+                                    <p class="yhreview">
+                                            大数据不仅“懂”你，还懂如何“宰”你
+
+                                            ...
+                                    </p>
+                        </li>
+                        <li>
+                                <div class="tx">
+                                        <img src="images/用户头像.gif">                            
+                                    </div>
+                                    <p class="yhname">
+                                        呗呗6290
+                                    </p>
+                                    <p class="yhreview">
+                                        啊啊啊啊啊
+                                    </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div id="bfeel">
+                <div id="bftitles">情绪分析</div>
+                <div class="bfline"></div>
+                <div id="picf">
+                    <script>
+                        // 绘制图表。
+                        
+                    </script>
+                </div>
+                <div id="picf-tip">
+                    <p>而在有效评论中进行情感分类，统计发现<p id="conc"></p>
+                    <br>
+                     将统计人数作为参考，我们可以认为发表评论时人们的态度为：
+                    <span id="feel">普遍支持</span>。
+                    <br/> <br/>而结合走势图分析，我们认为关于群众的情感倾向为
+                    <span id="topfeel">支持</span></p>
+                </div>
+            </div>
+            <div id="buser">
+                <div id="butitles">用户分析</div>
+                <div class="buline"></div>
+                <div id="picsex">
+                    <script>
+                                // 绘制图表。
+                       
+                        </script> 
+                </div>
+                <div id="picu">
+                        <script>
+                                // 绘制图表。
+                        
+                            </script> 
+                </div>
+            </div>
+            <div id="bdata">
+                <div id="bdtitles">评论分析</div>
+                <div class="bdline"></div>
+                <div id="picmt">
+                <div id="picm">
+                        <script>
+                                // 绘制图表。
+                        
+                            </script>
+                </div>
+                <div id="picm-tip">
+                        <p>本话题一共<span class="total">0</span>人参与<br /><br />
+                            其中有
+                            <span id="water">0</span>人的评论不具参考价值（无意义评论、
+                            水军、涉黄等）,占总数的<span id="waterrate">0%</span>。<br /><br />
+                            <p id="lowrate1"></p><br/><br/>
+                            <p>有关最受关注的评论详情可点击<a id="ptp" href="#bhreview">此处</a>或左侧“<span class="big">热点评论</span>”        
+                            </p>
+                        </p>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

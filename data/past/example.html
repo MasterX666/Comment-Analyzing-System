@@ -1,0 +1,91 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript">
+function search(){
+    var cont = $("input").serialize();
+    var name=JSON.stringify($("#username"));
+    console.log(typeof(name))
+    console.log(name)
+    var web;
+    $.ajax({
+    url:'ab.php',
+    async: false,
+    type:'post',
+    dataType:'json',
+    data:cont,
+    success:function(data){
+     var str = data.username;
+     name=str
+     }
+    });    
+    //console.log(typeof(name))
+    $.ajax({
+            type: "post",
+            url: "http://mxlxpsylab.cn:8099/getPdata",
+            async: false,
+			dataType: "json",
+			data:{id:1},
+            success: function(res){     
+                var s=$.parseJSON(res[1].pdatajson)
+                console.log(s.water)
+                if(name==s.water) alert("yes")
+                else console.log("no")
+                web=s.ptitle
+                console.log(web)
+            }
+            
+         });
+         $.ajax({
+            url:'ab.php',
+            async: false,
+            type:'post',
+            dataType:'json',
+            data:cont,
+            success:function(data){
+            //var str = data.username+web;
+            //name=str
+            $("#result").html(web);
+            }
+    });   
+    $.ajax({
+            url:'paper6.php',
+            async: false,
+            type:'post',
+            dataType:'json',
+            data:cont,
+            success:function(data){
+            //var str = data.username+web;
+            //name=str
+            }
+    }); 
+     return false;
+ };
+
+ $(function(){
+  $("#send").click(function(){
+   var cont = $("input").serialize();
+   $.ajax({
+    url:'ab.php',
+    type:'post',
+    dataType:'json',
+    data:cont,
+    success:function(data){
+     var str = data.username;
+     $("#result").html(str);
+    }
+   });
+  }); 
+ });
+</script>
+</head>
+<body>
+ <div id="result">一会看显示结果</div>
+ <form id="my" action="" method="post" onsubmit="return search()">
+  <p><span>姓名：</span><input type="text" name="username" /></p>
+  <input type="hidden" name="web"/>
+ </form>
+ <button id="send">提交</button>
+</body>
+</html>
